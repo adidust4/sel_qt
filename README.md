@@ -1,3 +1,3 @@
 # SEL QT Project
 
-[Website](http://adidust4.github.io/sel_qt)
+[http://adidust4.github.io/sel_qt](https://adidust4.github.io/sel_qt/)
