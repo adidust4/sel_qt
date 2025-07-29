@@ -11,7 +11,7 @@
 <script>    
 var url = prompt("Please enter QTrobot rosbridge url:", "ws://192.168.100.2:9091");
 url = (url == null) ? 'ws://127.0.0.1:9091' : url;
-var qtrobot = null;
+var qtrobot = null; 
 document.addEventListener('DOMContentLoaded', function () {
     console.log("connecting to QTrobot (please wait...)");
     qtrobot = new QTrobot({
