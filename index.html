@@ -5,34 +5,97 @@
     <script src="js/roslib.min.js"></script>
     <script src="js/eventemitter2.min.js"></script>
     <script src="js/qtrobot-1.0.min.js"></script>
+    <title>QTrobot Storytelling Control</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 40px;
+      }
+      button {
+        font-size: 1.5em;
+        padding: 10px 20px;
+        margin: 10px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
 </head>
 
 <body>
+    <h2>Child Storytelling Start / Stop Control</h2>
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+
 <script>    
 var url = prompt("Please enter QTrobot rosbridge url:", "ws://192.168.100.2:9091");
 url = (url == null) ? 'ws://127.0.0.1:9091' : url;
-var qtrobot = null; 
+
+var qtrobot = null;
+var controlPub = null;
+
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("connecting to QTrobot (please wait...)");
+    console.log("Connecting to QTrobot (please wait...)");
     qtrobot = new QTrobot({
         url : url,
-        connection: function(){            
-            console.log("connected to " + url);
-            qtrobot.talk_text('Hello! my name is QT!', function(){
-                qtrobot.show_emotion('QT/happy');
-            });        
+        connection: function(){
+            console.log("Connected to " + url);
+            // qtrobot.talk_text('Hello! my name is QT!', function(){
+            //   qtrobot.show_emotion('QT/happy');
+            // });
+
+            // Create Publisher to /child_story/control topic
+            controlPub = new ROSLIB.Topic({
+                ros: qtrobot.ros,
+                name: '/child_story/control',
+                messageType: 'std_msgs/String'
+            });
+
+            setupButtons();
         },
         error: function(error){
-            console.log(error);
+            console.error("Connection error:", error);
         },
         close: function(){
-            console.log("disconnected.");
+            console.log("Disconnected.");
         }
-    }); //end of qtrobot
+    }); // end of QTrobot
+
+    function setupButtons() {
+        const startBtn = document.getElementById("startBtn");
+        const stopBtn = document.getElementById("stopBtn");
+
+        startBtn.addEventListener("click", function() {
+            if (!controlPub) {
+                console.error("Control publisher not ready.");
+                return;
+            }
+            controlPub.publish(new ROSLIB.Message({ data: "start" }));
+            console.log("Published: start");
+            // Disable start button, enable stop button
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        });
+
+        stopBtn.addEventListener("click", function() {
+            if (!controlPub) {
+                console.error("Control publisher not ready.");
+                return;
+            }
+            controlPub.publish(new ROSLIB.Message({ data: "stop" }));
+            console.log("Published: stop");
+            // Enable start button, disable stop button
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        });
+    }
 
 }); // end of DOMContentLoaded
 </script>
 
-<p style="text-align: center;"> Open your browser console to see the output!</p>
+<p style="margin-top: 30px; font-style: italic;">Open your browser console to view logs and confirm the connection.</p>
 </body>
 </html>
